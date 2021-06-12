@@ -3,7 +3,7 @@
 
 BootStart	equ	0x1
 BootEnd		equ	0xff
-BootAddr	equ	0x7e00
+BootAddr	equ	0x8000
 
 _start:
 	mov	ax,	cs
@@ -70,6 +70,7 @@ _start:
 	add	bx,	2
 	loop	.get_data
 
+	;show boot message
 	mov	ax,	0x1301
 	mov	bx,	0x000f
 	mov	dx,	0x0100

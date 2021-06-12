@@ -1,59 +1,12 @@
-	org	0x7e00
-	jmp	_start
-	extern	load
-	global	_start
-
-[SECTION .s16]
-[BITS 16]
-
-_start:
-	mov	ax,	cs
-	mov	ds,	ax
-	mov	es,	ax
-	mov	ss,	ax
-	mov	sp,	0x00
-
-	;show boot message
-	mov	ax,	0x1301
-	mov	bx,	0x000f
-	mov	dx,	0x0100
-	mov	cx,	11
-	mov	bp,	TouhouBootMsg
-	int	0x10
-
-	;get memory address and type
-	
-	;get SVGA infomation
-
-	;enter 32bit mode
-	push	ax
-	in	al,	0x92
-	or	al,	0b00000010
-	out	0x92,	al
-	
-	cli
-	db	0x66
-	lidt	[IDT_POINTER]
-	db	0x66
-	lgdt	[GdtPtr]
-
-	mov	eax,	cr0
-	or	eax,	1
-	mov	cr0,	eax
-
-	jmp	dword	SelectorCode32: TMP_Protect
-
-[SECTION .s32]
+global	arch
 [BITS 32]
-TMP_Protect:
-	mov	ax,	SelectorData32
+arch:
+	mov	ax,	0x08
 	mov	ds,	ax
 	mov	es,	ax
 	mov	fs,	ax
 	mov	esp,	0x7c00
 
-	call	load
-	
 	mov	dword	[0x90000],	0x91007
 	mov	dword	[0x90004],	0x00000
 	mov	dword	[0x90800],	0x91007
@@ -102,17 +55,6 @@ TMP_Protect:
 	mov	cr0,	eax
 	jmp	SelectorCode64: KernelAddr
 
-[SECTION GDT]
-GDT:		dd	0, 0
-DESC_CODE32:	dd	0x0000ffff, 0x00cf9a00
-DESC_DATA32:	dd	0x0000ffff, 0x00cf9200
-
-GdtPtr:		dw	$ - GDT - 1
-		dd	GDT
-
-SelectorCode32	equ	DESC_CODE32 - GDT
-SelectorData32	equ	DESC_DATA32 - GDT
-
 [SECTION GDT64]
 GDT64:		dq	0
 DESC_CODE64:	dq	0x0020980000000000
@@ -131,4 +73,3 @@ IDT_END:
 
 IDT_POINTER:	dw	IDT_END - IDT - 1
 		dd	IDT
-TouhouBootMsg:	db	"Touhou boot"
