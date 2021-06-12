@@ -13,4 +13,4 @@ head.o: head.S
 	nasm -f elf -o head.o head.S
 
 clean:
-	rm *.o 
+	rm *.o loader *.bin 
