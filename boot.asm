@@ -70,9 +70,45 @@ _start:
 	add	bx,	2
 	loop	.get_data
 
-	jmp	$
+	mov	ax,	0x1301
+	mov	bx,	0x000f
+	mov	dx,	0x0100
+	mov	cx,	11
+	mov	bp,	TouhouBootMsg
+	int	0x10
 
-	times (510 - 64 - ( $ - $$ ) )	db	0
+	;get memory address and type
+	
+	;get SVGA infomation
+
+	;enter 32bit mode
+	in	al,	0x92
+	or	al,	0b00000010
+	out	0x92,	al
+	
+	cli
+	db	0x66
+	lgdt	[GdtPtr]
+
+	mov	eax,	cr0
+	or	eax,	1
+	mov	cr0,	eax
+
+	jmp	dword	SelectorCode32: BootAddr
+
+GDT:			dd	0, 0
+DESC_CODE32:		dd	0x0000ffff, 0x00cf9a00
+DESC_DATA32:		dd	0x0000ffff, 0x00cf9200
+
+GdtPtr:			dw	$ - GDT - 1
+			dd	GDT
+
+SelectorCode32		equ	DESC_CODE32 - GDT
+SelectorData32		equ	DESC_DATA32 - GDT
+
+TouhouBootMsg:		db	"Touhou boot"
+
+times (446 - ($ - $$))	db	0x00
 
 BootActiveFlag:		db	0x80
 BootCHS:		db	0, 0, 0, 0x81, 0, 0, 0
