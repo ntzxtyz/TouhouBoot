@@ -1,5 +1,7 @@
 global	arch
 [BITS 32]
+read_disk:
+	
 arch:
 	mov	ax,	0x08
 	mov	ds,	ax
